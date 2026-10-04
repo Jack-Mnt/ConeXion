@@ -1,0 +1,11 @@
+{
+  "version": "2.0.1",
+  "catalogo_incluido": false,
+  "snapshot_min_interval_hours": 2,
+  "snapshot_time_basis": "capturado_at",
+  "event_driven": true,
+  "catalog_auto_update": true,
+  "catalog_path": "C:/ProgramData/PuertoRico/ConeXion/Catalog",
+  "catalog_schema_version": 2,
+  "snapshot_contract_version": 2
+}
