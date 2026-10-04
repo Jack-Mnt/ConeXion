@@ -1,0 +1,43 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Brand: rapidez, eficiencia e innovación -->
+    <Color x:Key="JmColor.Primary">#2563EB</Color>
+    <Color x:Key="JmColor.PrimaryHover">#1D4ED8</Color>
+    <Color x:Key="JmColor.PrimaryPressed">#1E40AF</Color>
+    <Color x:Key="JmColor.Secondary">#06B6D4</Color>
+    <Color x:Key="JmColor.Accent">#7C3AED</Color>
+
+    <Color x:Key="JmColor.Background">#F4F7FB</Color>
+    <Color x:Key="JmColor.Surface">#FFFFFF</Color>
+    <Color x:Key="JmColor.SurfaceAlt">#EEF3F8</Color>
+    <Color x:Key="JmColor.Border">#D8E0EA</Color>
+
+    <Color x:Key="JmColor.TextPrimary">#172033</Color>
+    <Color x:Key="JmColor.TextSecondary">#5F6B7A</Color>
+    <Color x:Key="JmColor.TextDisabled">#98A2B3</Color>
+    <Color x:Key="JmColor.OnPrimary">#FFFFFF</Color>
+
+    <Color x:Key="JmColor.Success">#15803D</Color>
+    <Color x:Key="JmColor.Warning">#B45309</Color>
+    <Color x:Key="JmColor.Error">#B42318</Color>
+    <Color x:Key="JmColor.Info">#0369A1</Color>
+
+    <SolidColorBrush x:Key="JmBrush.Primary" Color="{StaticResource JmColor.Primary}" />
+    <SolidColorBrush x:Key="JmBrush.PrimaryHover" Color="{StaticResource JmColor.PrimaryHover}" />
+    <SolidColorBrush x:Key="JmBrush.PrimaryPressed" Color="{StaticResource JmColor.PrimaryPressed}" />
+    <SolidColorBrush x:Key="JmBrush.Secondary" Color="{StaticResource JmColor.Secondary}" />
+    <SolidColorBrush x:Key="JmBrush.Accent" Color="{StaticResource JmColor.Accent}" />
+    <SolidColorBrush x:Key="JmBrush.Background" Color="{StaticResource JmColor.Background}" />
+    <SolidColorBrush x:Key="JmBrush.Surface" Color="{StaticResource JmColor.Surface}" />
+    <SolidColorBrush x:Key="JmBrush.SurfaceAlt" Color="{StaticResource JmColor.SurfaceAlt}" />
+    <SolidColorBrush x:Key="JmBrush.Border" Color="{StaticResource JmColor.Border}" />
+    <SolidColorBrush x:Key="JmBrush.TextPrimary" Color="{StaticResource JmColor.TextPrimary}" />
+    <SolidColorBrush x:Key="JmBrush.TextSecondary" Color="{StaticResource JmColor.TextSecondary}" />
+    <SolidColorBrush x:Key="JmBrush.TextDisabled" Color="{StaticResource JmColor.TextDisabled}" />
+    <SolidColorBrush x:Key="JmBrush.OnPrimary" Color="{StaticResource JmColor.OnPrimary}" />
+    <SolidColorBrush x:Key="JmBrush.Success" Color="{StaticResource JmColor.Success}" />
+    <SolidColorBrush x:Key="JmBrush.Warning" Color="{StaticResource JmColor.Warning}" />
+    <SolidColorBrush x:Key="JmBrush.Error" Color="{StaticResource JmColor.Error}" />
+    <SolidColorBrush x:Key="JmBrush.Info" Color="{StaticResource JmColor.Info}" />
+</ResourceDictionary>

@@ -1,0 +1,3 @@
+C:\Dev\GitHub\ConeXion_2.0.1\release\ConeXion.Admin\ConeXion.Admin.pdb
+C:\Dev\GitHub\ConeXion_2.0.1\release\ConeXion.Admin\ConeXion.Core.pdb
+C:\Dev\GitHub\ConeXion_2.0.1\release\ConeXion.Admin\ConeXion.Admin.exe

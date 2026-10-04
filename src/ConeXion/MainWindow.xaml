@@ -1,0 +1,145 @@
+<Window x:Class="ConeXion.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ConeXion" Width="980" Height="700" MinWidth="920" MinHeight="640"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource JmBrush.Background}"
+        FontFamily="Segoe UI Variable Text, Segoe UI" Icon="ConeXion.ico"
+        Closing="Window_Closing">
+    <Window.Resources>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource JmBrush.Primary}" />
+            <Setter Property="Foreground" Value="{StaticResource JmBrush.OnPrimary}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="24,12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource JmBrush.TextSecondary}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="42" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="28,24,28,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="SidePanelColumn" Width="0" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Margin="0,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="ConeXion.ico" Width="54" Height="54" Margin="0,0,14,0" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="ConeXion" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" />
+                            <TextBlock x:Name="StoreText" Text="—" FontSize="16" Foreground="{StaticResource JmBrush.TextSecondary}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                        <Border x:Name="ConnectionBadge" Background="#FFF7ED" CornerRadius="13" Padding="11,5" HorizontalAlignment="Right">
+                            <TextBlock x:Name="ConnectionText" Text="Sin conexión" Foreground="{StaticResource JmBrush.Warning}" FontWeight="SemiBold" />
+                        </Border>
+                        <TextBlock x:Name="CatalogText" Text="Catálogo —" Foreground="{StaticResource JmBrush.TextSecondary}" HorizontalAlignment="Right" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Stock status -->
+                <Border Grid.Row="1" Background="{StaticResource JmBrush.Surface}" BorderBrush="{StaticResource JmBrush.Border}" BorderThickness="1" CornerRadius="12" Padding="18" Margin="0,22,0,18">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <Border Width="42" Height="42" Background="#ECFDF3" CornerRadius="21" VerticalAlignment="Top">
+                            <TextBlock Text="✓" Foreground="{StaticResource JmBrush.Success}" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                            <TextBlock x:Name="StockStatusTitle" Text="Aún no hay inventarios cargados" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" />
+                            <TextBlock x:Name="StockStatusSubtitle" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" Margin="0,5,0,0" TextWrapping="Wrap" />
+                            <TextBlock x:Name="PendingText" Text="" Foreground="{StaticResource JmBrush.Warning}" Margin="0,5,0,0" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Main operation area -->
+                <Border x:Name="DropZone" Grid.Row="2" BorderBrush="{StaticResource JmBrush.Primary}" BorderThickness="1.5" CornerRadius="14" Background="{StaticResource JmBrush.Surface}" AllowDrop="True"
+                        DragEnter="DropZone_DragEnter" DragLeave="DropZone_DragLeave" Drop="DropZone_Drop">
+                    <Grid Margin="24">
+                        <StackPanel x:Name="ReadyPanel" VerticalAlignment="Center" HorizontalAlignment="Center" Width="480">
+                            <TextBlock Text="↗" FontSize="56" Foreground="{StaticResource JmBrush.Primary}" HorizontalAlignment="Center" FontWeight="SemiBold" />
+                            <TextBlock Text="Arrastra tu archivo aquí" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" HorizontalAlignment="Center" />
+                            <TextBlock Text="STOCK .xlsx" FontSize="16" Foreground="{StaticResource JmBrush.TextSecondary}" Margin="0,7,0,22" HorizontalAlignment="Center" />
+                            <Button x:Name="SelectFileButton" Style="{StaticResource PrimaryButton}" Click="SelectFileButton_Click" Content="Seleccionar archivo" Height="46" MinWidth="220" />
+                            <TextBlock x:Name="WaitText" Text="Solo se admiten archivos .xlsx" TextAlignment="Center" Foreground="{StaticResource JmBrush.TextSecondary}" Margin="0,16,0,0" />
+                        </StackPanel>
+
+                        <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="40,0">
+                            <TextBlock x:Name="ProgressTitle" Text="Validando" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" HorizontalAlignment="Center" />
+                            <ProgressBar IsIndeterminate="True" Height="6" Margin="0,22,0,24" Foreground="{StaticResource JmBrush.Primary}" />
+                            <UniformGrid Columns="5">
+                                <TextBlock x:Name="Step1" Text="Validando" TextAlignment="Center" Foreground="{StaticResource JmBrush.Primary}" FontWeight="SemiBold" />
+                                <TextBlock x:Name="Step2" Text="Comparando" TextAlignment="Center" Foreground="{StaticResource JmBrush.TextDisabled}" />
+                                <TextBlock x:Name="Step3" Text="Preparando" TextAlignment="Center" Foreground="{StaticResource JmBrush.TextDisabled}" />
+                                <TextBlock x:Name="Step4" Text="Enviando" TextAlignment="Center" Foreground="{StaticResource JmBrush.TextDisabled}" />
+                                <TextBlock x:Name="Step5" Text="Completado" TextAlignment="Center" Foreground="{StaticResource JmBrush.TextDisabled}" />
+                            </UniformGrid>
+                            <TextBlock x:Name="ProgressFile" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" Margin="0,20,0,0" />
+                        </StackPanel>
+
+                        <StackPanel x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Width="560">
+                            <TextBlock x:Name="ResultTitle" Text="" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" TextAlignment="Center" />
+                            <TextBlock x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,18" />
+                            <TextBlock x:Name="ResultSummary" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <TextBlock x:Name="CountdownText" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.Primary}" HorizontalAlignment="Center" Margin="0,16,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- navigation -->
+                <Grid Grid.Row="3" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Style="{StaticResource NavButton}" Click="History_Click" Content="◷  Historial" HorizontalAlignment="Center" />
+                    <Button Grid.Column="1" Style="{StaticResource NavButton}" Click="Incidents_Click" Content="⚠  Incidencias" HorizontalAlignment="Center" />
+                </Grid>
+            </Grid>
+
+            <!-- Side panel -->
+            <Border x:Name="SidePanel" Grid.Column="1" Visibility="Collapsed" Width="360" Background="{StaticResource JmBrush.Surface}" BorderBrush="{StaticResource JmBrush.Border}" BorderThickness="1" CornerRadius="12" Margin="18,0,0,0" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="SidePanelTitle" Text="Historial" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" />
+                        <Button Grid.Column="1" Content="×" Click="CloseSidePanel_Click" Background="Transparent" BorderThickness="0" FontSize="20" Foreground="{StaticResource JmBrush.TextSecondary}" Cursor="Hand" />
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,14,0,0">
+                        <StackPanel x:Name="SidePanelContent" />
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" BorderBrush="{StaticResource JmBrush.Border}" BorderThickness="0,1,0,0" Background="{StaticResource JmBrush.Surface}">
+            <Grid Margin="28,0">
+                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBlock Text="Built by Jack Mnt" Foreground="{StaticResource JmBrush.TextSecondary}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Versión 2.0.1" Foreground="{StaticResource JmBrush.TextSecondary}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
