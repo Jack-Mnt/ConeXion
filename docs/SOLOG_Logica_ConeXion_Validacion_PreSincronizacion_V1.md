@@ -5,7 +5,7 @@
 - Proyecto: SOLOG / ConeXion
 - Tipo: delta funcional
 - Clasificación: Nivel B — implementación funcional
-- Estado: CONGELADO PARA IMPLEMENTACIÓN
+- Estado: IMPLEMENTADO — VALIDACIÓN TÉCNICA/HUMANA PENDIENTE
 - Baseline: `Jack-Mnt/ConeXion` · rama `main`
 - HEAD previo: `f15145554d15b7fe7d0798bbb20f4d2fd060c7a7`
 - Versión objetivo: ConeXion 2.1.0
@@ -178,3 +178,24 @@ F. La regla de dos horas se mantiene para snapshots válidos enviados.
 G. El JSON válido conserva exactamente el contrato V2.
 
 H. Un `Pending` legacy no utilizable nunca llega al gateway y pasa a `Failed` local.
+
+
+## Implementación
+
+Implementado en ConeXion 2.1.0.
+
+Componentes principales:
+
+- `SnapshotUsabilityValidator`: determina utilizabilidad por resolubilidad de `eliminados[]`.
+- `MainWindow.ProcessFileAsync`: valida antes de hash/ventana/`Pending`.
+- `SyncCoordinator`: revalida pendientes legacy antes del gateway y marca `Failed` local si no son utilizables.
+- `ResultPanel`: muestra bloqueantes, corrección específica y CTA **Cargar otro Excel**.
+- Suite `ConeXion.Validation`: cubre snapshot resoluble, producto ausente, duplicado, stock inválido y motivo futuro no resoluble.
+
+No se modificó Supabase ni el contrato JSON V2.
+
+### Estado de validación
+
+La implementación y revisión estática están completadas. La ejecución de `VALIDAR-CONTRATO-V2.ps1` y `BUILD-PILOTO.ps1` queda pendiente en un entorno Windows con .NET 8, ya que el entorno de implementación actual no dispone del SDK .NET/WPF.
+
+Smoke humano pendiente antes de cerrar el bloque.
