@@ -1,11 +1,11 @@
-# Instalación / actualización de ConeXion 2.0.1
+# Instalación / actualización de ConeXion 2.0.2
 
 ## Compilar
 
 En PowerShell:
 
 ```powershell
-cd C:\Dev\ConeXion_2.0.1
+cd C:\Dev\ConeXion_2.0.2
 .\BUILD-PILOTO.ps1
 ```
 
@@ -16,7 +16,7 @@ Se generan ejecutables self-contained `win-x64` en `release\`.
 Abrir PowerShell como administrador:
 
 ```powershell
-cd C:\Dev\ConeXion_2.0.1
+cd C:\Dev\ConeXion_2.0.2
 .\INSTALAR-PILOTO.ps1
 ```
 
