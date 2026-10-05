@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly ConeXionRuntime _runtime = new(AppPaths.Production());
     private CatalogDocument? _catalog;
     private InstallationConfig? _installation;
+    private readonly List<Button> _blockingErrorCards = [];
     private bool _busy;
     private bool _allowClose;
 
@@ -124,7 +125,12 @@ public partial class MainWindow : Window
 
     private void SelectFileButton_Click(object sender,RoutedEventArgs e) => OpenFilePicker();
 
-    private void ResultActionButton_Click(object sender, RoutedEventArgs e) => OpenFilePicker();
+    private void ResultCloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        ShowReady();
+        SetInputEnabled(_catalog is not null && _installation?.Provisioned == true);
+    }
 
     private void OpenFilePicker()
     {
@@ -262,103 +268,185 @@ public partial class MainWindow : Window
         ProgressPanel.Visibility=Visibility.Collapsed;
         ReadyPanel.Visibility=Visibility.Collapsed;
         ResultPanel.Visibility=Visibility.Visible;
+
         ResultTitle.Text="No se puede actualizar el inventario";
-        ResultTitle.Foreground=(Brush)FindResource("JmBrush.Warning");
-        ResultSubtitle.Text="El archivo contiene errores que impedirían iniciar un conteo en SOLOG. Corrígelos antes de continuar.";
+        ResultTitle.Foreground=(Brush)FindResource("JmBrush.TextPrimary");
+        ResultTitle.TextAlignment=TextAlignment.Left;
+        ResultSubtitle.Text="El archivo contiene errores que impedirían iniciar un conteo en SOLOG.";
+        ResultSubtitle.TextAlignment=TextAlignment.Left;
         ResultSummary.Text="";
         CountdownText.Text="";
         CountdownText.Visibility=Visibility.Collapsed;
 
-        ResultDetailsPanel.Children.Clear();
-        foreach (var blocker in usability.Blockers)
-            ResultDetailsPanel.Children.Add(BuildBlockingCard(blocker));
+        BlockingErrorsPanel.Children.Clear();
+        BlockingSolutionPanel.Children.Clear();
+        _blockingErrorCards.Clear();
 
-        ResultDetailsScroll.Visibility=Visibility.Visible;
-        ResultActionButton.Visibility=Visibility.Visible;
-        ResultActionButton.IsEnabled=true;
+        foreach (var blocker in usability.Blockers)
+        {
+            var card = BuildBlockingErrorCard(blocker);
+            _blockingErrorCards.Add(card);
+            BlockingErrorsPanel.Children.Add(card);
+        }
+
+        BlockingResultGrid.Visibility=Visibility.Visible;
+        ResultCloseButton.Visibility=Visibility.Visible;
+
+        if (_blockingErrorCards.Count > 0)
+            SelectBlockingErrorCard(_blockingErrorCards[0]);
     }
 
-    private Border BuildBlockingCard(SnapshotUsabilityBlocker blocker)
+    private Button BuildBlockingErrorCard(SnapshotUsabilityBlocker blocker)
     {
-        var content = new StackPanel();
+        var content = new Grid();
+        content.ColumnDefinitions.Add(new ColumnDefinition());
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
+        var details = new StackPanel();
         var product = new TextBlock
         {
             TextWrapping = TextWrapping.Wrap,
             Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
-            FontSize = 15
+            FontSize = 14
         };
-        product.Inlines.Add(new Run($"Código {blocker.CInterno} — ") { FontWeight = FontWeights.SemiBold });
+        product.Inlines.Add(new Run($"{blocker.CInterno} — ") { FontWeight = FontWeights.SemiBold });
         product.Inlines.Add(new Run(blocker.Producto));
-        content.Children.Add(product);
+        details.Children.Add(product);
 
-        content.Children.Add(new TextBlock
+        details.Children.Add(new TextBlock
         {
             Text = BlockerTitle(blocker.Motivo),
             FontWeight = FontWeights.SemiBold,
             Foreground = (Brush)FindResource("JmBrush.Warning"),
-            Margin = new Thickness(0, 6, 0, 8)
+            Margin = new Thickness(0, 5, 0, 5)
         });
 
-        if (blocker.Observations.Count > 0)
+        foreach (var observation in blocker.Observations)
         {
-            content.Children.Add(new TextBlock
+            var row = observation.Row.HasValue ? $"Fila {observation.Row.Value}" : "Fila no identificada";
+            var value = string.IsNullOrWhiteSpace(observation.Value) ? "(vacío)" : observation.Value;
+            var detail = blocker.Motivo == "codigo_interno_duplicado"
+                ? $"• {row} — stock {value}"
+                : blocker.Motivo == "stock_invalido"
+                    ? $"• {row} — valor encontrado: {value}"
+                    : $"• {row} — {value}";
+
+            details.Children.Add(new TextBlock
             {
-                Text = "Encontrado en:",
-                FontWeight = FontWeights.SemiBold,
-                Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
-                Margin = new Thickness(0, 0, 0, 4)
-            });
-
-            foreach (var observation in blocker.Observations)
-            {
-                var row = observation.Row.HasValue ? $"Fila {observation.Row.Value}" : "Fila no identificada";
-                var value = string.IsNullOrWhiteSpace(observation.Value) ? "(vacío)" : observation.Value;
-                var detail = blocker.Motivo == "codigo_interno_duplicado"
-                    ? $"• {row} — stock {value}"
-                    : blocker.Motivo == "stock_invalido"
-                        ? $"• {row} — valor encontrado: {value}"
-                        : $"• {row} — {value}";
-
-                content.Children.Add(new TextBlock
-                {
-                    Text = detail,
-                    TextWrapping = TextWrapping.Wrap,
-                    Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
-                    Margin = new Thickness(0, 0, 0, 3)
-                });
-            }
-        }
-
-        content.Children.Add(new TextBlock
-        {
-            Text = "Cómo solucionarlo:",
-            FontWeight = FontWeights.SemiBold,
-            Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
-            Margin = new Thickness(0, 10, 0, 4)
-        });
-
-        foreach (var step in BlockerResolutionSteps(blocker))
-        {
-            content.Children.Add(new TextBlock
-            {
-                Text = step,
+                Text = detail,
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
-                Margin = new Thickness(0, 0, 0, 3)
+                Margin = new Thickness(0, 0, 0, 2)
             });
         }
 
-        return new Border
+        content.Children.Add(details);
+
+        var chevron = new TextBlock
         {
-            Background = (Brush)FindResource("JmBrush.SurfaceAlt"),
-            BorderBrush = (Brush)FindResource("JmBrush.Border"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(10),
-            Padding = new Thickness(14),
-            Margin = new Thickness(0, 0, 0, 12),
-            Child = content
+            Text = "›",
+            FontSize = 24,
+            Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(12, 0, 0, 0)
         };
+        Grid.SetColumn(chevron, 1);
+        content.Children.Add(chevron);
+
+        var button = new Button
+        {
+            Style = (Style)FindResource("BlockingCardButton"),
+            Content = content,
+            Tag = blocker,
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+        button.Click += BlockingErrorCard_Click;
+        return button;
+    }
+
+    private void BlockingErrorCard_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button)
+            SelectBlockingErrorCard(button);
+    }
+
+    private void SelectBlockingErrorCard(Button selected)
+    {
+        foreach (var card in _blockingErrorCards)
+        {
+            var active = ReferenceEquals(card, selected);
+            card.Background = active
+                ? (Brush)FindResource("JmBrush.SurfaceAlt")
+                : (Brush)FindResource("JmBrush.Surface");
+            card.BorderBrush = active
+                ? (Brush)FindResource("JmBrush.Primary")
+                : (Brush)FindResource("JmBrush.Border");
+            card.BorderThickness = new Thickness(active ? 1.5 : 1);
+        }
+
+        if (selected.Tag is SnapshotUsabilityBlocker blocker)
+            RenderBlockingSolution(blocker);
+    }
+
+    private void RenderBlockingSolution(SnapshotUsabilityBlocker blocker)
+    {
+        BlockingSolutionPanel.Children.Clear();
+
+        BlockingSolutionPanel.Children.Add(new TextBlock
+        {
+            Text = BlockerTitle(blocker.Motivo),
+            FontSize = 15,
+            FontWeight = FontWeights.SemiBold,
+            Foreground = (Brush)FindResource("JmBrush.Warning")
+        });
+
+        BlockingSolutionPanel.Children.Add(new TextBlock
+        {
+            Text = BlockerDescription(blocker.Motivo),
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
+            Margin = new Thickness(0, 6, 0, 10)
+        });
+
+        var steps = BlockerResolutionSteps(blocker);
+        for (var i = 0; i < steps.Count; i++)
+            BlockingSolutionPanel.Children.Add(BuildSolutionStep(i + 1, steps[i]));
+    }
+
+    private FrameworkElement BuildSolutionStep(int number, string text)
+    {
+        var row = new Grid { Margin = new Thickness(0, 0, 0, 7) };
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        row.ColumnDefinitions.Add(new ColumnDefinition());
+
+        var badge = new Border
+        {
+            Width = 24,
+            Height = 24,
+            CornerRadius = new CornerRadius(12),
+            Background = (Brush)FindResource("JmBrush.Primary"),
+            VerticalAlignment = VerticalAlignment.Top,
+            Child = new TextBlock
+            {
+                Text = number.ToString(),
+                Foreground = (Brush)FindResource("JmBrush.OnPrimary"),
+                FontWeight = FontWeights.SemiBold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            }
+        };
+        row.Children.Add(badge);
+
+        var label = new TextBlock
+        {
+            Text = text,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
+            Margin = new Thickness(10, 2, 0, 0)
+        };
+        Grid.SetColumn(label, 1);
+        row.Children.Add(label);
+        return row;
     }
 
     private static string BlockerTitle(string reason)
@@ -369,39 +457,50 @@ public partial class MainWindow : Window
             _ => "Stock no resoluble"
         };
 
+    private static string BlockerDescription(string reason)
+        => reason switch
+        {
+            "codigo_interno_duplicado" => "ConeXion detectó más de una fila con el mismo código interno y no puede determinar un stock válido.",
+            "stock_invalido" => "ConeXion no puede interpretar el valor de Stock como un número entero válido y no puede determinar un stock válido.",
+            _ => "ConeXion no puede determinar un stock válido para este producto."
+        };
+
     private static IReadOnlyList<string> BlockerResolutionSteps(SnapshotUsabilityBlocker blocker)
         => blocker.Motivo switch
         {
             "codigo_interno_duplicado" =>
             [
-                "1. Abre Tumisoft.",
-                $"2. Busca el código interno {blocker.CInterno}.",
-                "3. Corrige el código interno de los códigos duplicados.",
-                "4. Guarda los cambios y descarga el inventario nuevamente.",
-                "5. Carga el nuevo Excel en ConeXion."
+                "Abre Tumisoft.",
+                $"Busca el código interno {blocker.CInterno}.",
+                "Corrige el código interno de los códigos duplicados.",
+                "Guarda los cambios y descarga el inventario nuevamente.",
+                "Carga el nuevo Excel en ConeXion."
             ],
             "stock_invalido" =>
             [
-                "1. Abre el archivo de inventario.",
-                "2. Ve a la fila indicada.",
-                "3. Corrige el valor de Stock para que sea un NÚMERO ENTERO VÁLIDO.",
-                "4. No elimines el producto ni cambies su código interno.",
-                "5. Guarda el archivo y vuelve a cargarlo en ConeXion."
+                "Abre el archivo de inventario.",
+                "Ve a la fila indicada.",
+                "Corrige el valor de Stock para que sea un NÚMERO ENTERO VÁLIDO.",
+                "No elimines el producto ni cambies su código interno.",
+                "Guarda el archivo y vuelve a cargarlo en ConeXion."
             ],
             _ =>
             [
-                "1. Revisa el producto indicado en el archivo de inventario.",
-                "2. Corrige el dato que impide determinar un stock válido.",
-                "3. Guarda el archivo y vuelve a cargarlo en ConeXion."
+                "Revisa el producto indicado en el archivo de inventario.",
+                "Corrige el dato que impide determinar un stock válido.",
+                "Guarda el archivo y vuelve a cargarlo en ConeXion."
             ]
         };
 
     private void ResetResultDetails()
     {
-        ResultDetailsPanel.Children.Clear();
-        ResultDetailsScroll.Visibility=Visibility.Collapsed;
-        ResultActionButton.Visibility=Visibility.Collapsed;
-        ResultActionButton.IsEnabled=false;
+        BlockingErrorsPanel.Children.Clear();
+        BlockingSolutionPanel.Children.Clear();
+        _blockingErrorCards.Clear();
+        BlockingResultGrid.Visibility=Visibility.Collapsed;
+        ResultCloseButton.Visibility=Visibility.Collapsed;
+        ResultTitle.TextAlignment=TextAlignment.Center;
+        ResultSubtitle.TextAlignment=TextAlignment.Center;
         CountdownText.Visibility=Visibility.Visible;
     }
 
