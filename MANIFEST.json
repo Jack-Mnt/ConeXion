@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2",
+  "version": "2.1.0",
   "catalogo_incluido": false,
   "snapshot_min_interval_hours": 2,
   "snapshot_time_basis": "capturado_at",
@@ -8,5 +8,5 @@
   "catalog_path": "C:/ProgramData/PuertoRico/ConeXion/Catalog",
   "catalog_schema_version": 2,
   "snapshot_contract_version": 2,
-  "notes": "Corrección puntual de normalización de Precio venta para residuos IEEE-754 de Excel."
+  "notes": "Validación local previa a sincronización: snapshots con stock no resoluble se bloquean antes de Pending/upload; contrato V2 y ventana remota de 2 horas sin cambios."
 }
