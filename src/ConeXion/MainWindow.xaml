@@ -105,7 +105,7 @@
                             <TextBlock x:Name="ResultTitle" Text="" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" TextAlignment="Center" />
                             <TextBlock x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,18" />
                             <TextBlock x:Name="ResultSummary" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" />
-                            <ScrollViewer x:Name="ResultDetailsScroll" Visibility="Collapsed" MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,0,0,18">
+                            <ScrollViewer x:Name="ResultDetailsScroll" Visibility="Collapsed" MaxHeight="180" VerticalScrollBarVisibility="Auto" Margin="0,0,0,18">
                                 <StackPanel x:Name="ResultDetailsPanel" />
                             </ScrollViewer>
                             <Button x:Name="ResultActionButton" Visibility="Collapsed" Style="{StaticResource PrimaryButton}" Click="ResultActionButton_Click"
