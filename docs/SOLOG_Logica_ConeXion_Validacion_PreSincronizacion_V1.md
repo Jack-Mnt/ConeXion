@@ -219,3 +219,17 @@ Aprobado como delta visual Nivel A dentro del mismo bloque:
 - no se utilizan radio buttons: la selección se comunica mediante el resaltado de la tarjeta completa;
 - el CTA **Cargar otro Excel** se reemplaza por una **X** que vuelve al `ReadyPanel`, habilitando nuevamente drag & drop y selección de archivo;
 - no se modifica lógica de validación, persistencia, sincronización, contrato V2 ni backend.
+
+
+### Ajuste visual de estado de éxito
+
+Aprobado como delta visual Nivel A:
+
+- título: **Exportación correcta**;
+- subtítulo en color de error: **Este mensaje se autodestruirá en 5 segundos**;
+- el mensaje de incidencias se mantiene como texto informativo separado;
+- se añade una tarjeta inferior con contador en formato `SS:CC` (segundos:centésimas), iniciando en `05:00`;
+- el contador permanece estático durante 2 segundos antes de comenzar;
+- la cuenta regresiva se calcula contra tiempo transcurrido real y termina en `00:00`;
+- al completar los 5 segundos de cuenta regresiva, ConeXion se cierra automáticamente;
+- no cambia procesamiento, snapshot, persistencia, sincronización ni contrato V2.
