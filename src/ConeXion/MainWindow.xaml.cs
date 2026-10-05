@@ -382,9 +382,7 @@ public partial class MainWindow : Window
             "stock_invalido" =>
             [
                 "1. Abre el archivo de inventario.",
-                blocker.Observations.FirstOrDefault()?.Row is int row
-                    ? $"2. Ve a la fila {row}."
-                    : "2. Ve a la fila indicada.",
+                "2. Ve a la fila indicada.",
                 "3. Corrige el valor de Stock para que sea un NÚMERO ENTERO VÁLIDO.",
                 "4. No elimines el producto ni cambies su código interno.",
                 "5. Guarda el archivo y vuelve a cargarlo en ConeXion."
