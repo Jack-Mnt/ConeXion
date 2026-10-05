@@ -267,6 +267,7 @@ public partial class MainWindow : Window
         ResultSubtitle.Text="El archivo contiene errores que impedirían iniciar un conteo en SOLOG. Corrígelos antes de continuar.";
         ResultSummary.Text="";
         CountdownText.Text="";
+        CountdownText.Visibility=Visibility.Collapsed;
 
         ResultDetailsPanel.Children.Clear();
         foreach (var blocker in usability.Blockers)
@@ -401,6 +402,7 @@ public partial class MainWindow : Window
         ResultDetailsScroll.Visibility=Visibility.Collapsed;
         ResultActionButton.Visibility=Visibility.Collapsed;
         ResultActionButton.IsEnabled=false;
+        CountdownText.Visibility=Visibility.Visible;
     }
 
     private void ShowPendingConnectionFailure(SnapshotDocument s,string? detail)
@@ -408,14 +410,14 @@ public partial class MainWindow : Window
         ResetResultDetails();
         ProgressPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Visible;
         ResultTitle.Text="No se ha podido cargar el inventario por fallo en la conexión.";ResultTitle.Foreground=(Brush)FindResource("JmBrush.Warning");
-        ResultSubtitle.Text=string.IsNullOrWhiteSpace(detail)?"El inventario quedó guardado localmente.":detail;ResultSummary.Text=BuildSummary(s);CountdownText.Text="";
+        ResultSubtitle.Text=string.IsNullOrWhiteSpace(detail)?"El inventario quedó guardado localmente.":detail;ResultSummary.Text=BuildSummary(s);CountdownText.Text="";CountdownText.Visibility=Visibility.Collapsed;
     }
     private async Task ShowSuccessAndCloseAsync(SnapshotDocument s)
     {
         ResetResultDetails();
         ProgressPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Visible;
         ResultTitle.Foreground=(Brush)FindResource("JmBrush.Success");ResultTitle.Text="Exportación correcta, se autodestruirá en 5 segundos...";
-        ResultSubtitle.Text=s.Incidencias.Count==0?"":"Se detectaron incidencias y fueron registradas para revisión.";ResultSummary.Text=BuildSummary(s);
+        ResultSubtitle.Text=s.Incidencias.Count==0?"":"Se detectaron incidencias y fueron registradas para revisión.";ResultSummary.Text=BuildSummary(s);CountdownText.Visibility=Visibility.Visible;
         for(int i=5;i>=1;i--){CountdownText.Text=i.ToString();await Task.Delay(1000);}
         _allowClose=true;Close();
     }
