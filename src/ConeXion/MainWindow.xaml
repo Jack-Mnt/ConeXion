@@ -101,10 +101,15 @@
                             <TextBlock x:Name="ProgressFile" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" Margin="0,20,0,0" />
                         </StackPanel>
 
-                        <StackPanel x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Width="560">
+                        <StackPanel x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Width="680">
                             <TextBlock x:Name="ResultTitle" Text="" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" TextAlignment="Center" />
                             <TextBlock x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,18" />
                             <TextBlock x:Name="ResultSummary" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <ScrollViewer x:Name="ResultDetailsScroll" Visibility="Collapsed" MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,0,0,18">
+                                <StackPanel x:Name="ResultDetailsPanel" />
+                            </ScrollViewer>
+                            <Button x:Name="ResultActionButton" Visibility="Collapsed" Style="{StaticResource PrimaryButton}" Click="ResultActionButton_Click"
+                                    Content="Cargar otro Excel" Height="46" MinWidth="220" HorizontalAlignment="Center" />
                             <TextBlock x:Name="CountdownText" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.Primary}" HorizontalAlignment="Center" Margin="0,16,0,0" />
                         </StackPanel>
                     </Grid>
