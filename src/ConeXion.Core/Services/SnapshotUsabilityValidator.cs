@@ -138,7 +138,7 @@ public static class SnapshotUsabilityValidator
     private static List<string?> ReadTextList(object? value)
     {
         if (value is JsonElement json && json.ValueKind == JsonValueKind.Array)
-            return json.EnumerateArray().Select(ReadScalarText).ToList();
+            return json.EnumerateArray().Select(x => ReadScalarText(x)).ToList();
 
         if (value is System.Collections.IEnumerable sequence && value is not string)
         {
