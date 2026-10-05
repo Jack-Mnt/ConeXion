@@ -16,6 +16,7 @@ var tests = new (string Name, Action Test)[]
     ("InventoryProcessor conserva código inválido sin original", InventoryProcessorInvalidCodeWithoutOriginal),
     ("InventoryProcessor detecta cambios comerciales V2", InventoryProcessorCommercialChanges),
     ("InventoryProcessor ignora diferencias de whitespace en código de barras", InventoryProcessorIgnoresBarcodeWhitespace),
+    ("InventoryProcessor normaliza residuos binarios de precio Excel", InventoryProcessorNormalizesExcelPriceArtifact),
     ("InventoryProcessor producto_nuevo nunca entra en stock", InventoryProcessorNewProductsOnlyIncident),
     ("InventoryProcessor rechaza precio negativo de producto nuevo", InventoryProcessorRejectsNegativeNewPrice),
     ("Serialización V2 no contiene ignorados", SerializationIsExactV2),
@@ -244,6 +245,21 @@ static void InventoryProcessorIgnoresBarcodeWhitespace()
     finally { File.Delete(file); }
 }
 
+
+static void InventoryProcessorNormalizesExcelPriceArtifact()
+{
+    var catalog = CatalogOne(20266, "A", "1", 2.2m);
+    var file = CreateXlsx(Row("HUACA", "A", "20266", "1", "2.2000000000000002", "3"));
+    try
+    {
+        var s = new InventoryProcessor().Process(file, catalog, "Huaca").Snapshot;
+        True(!s.Incidencias.Any(x => x.CInterno == 20266 && x.Tipo == "precio_modificado"),
+            "2.2000000000000002 debe normalizarse al valor Excel 2.2");
+        Eq(3, Single(s.Stock, x => x.CInterno == 20266).Stock, "stock debe preservarse");
+    }
+    finally { File.Delete(file); }
+}
+
 static void InventoryProcessorNewProductsOnlyIncident()
 {
     var catalog = CatalogOne(20101, "A", "1", 1m);
@@ -312,12 +328,12 @@ static void GatewayUsesV2Contracts()
     );
     using var gateway = new SupabaseGateway("https://unit.test", handler);
     var creds = new InstallationCredentials("iid", "secret");
-    var state = gateway.GetStateAsync(creds, "2.0.1", 6, "abc").GetAwaiter().GetResult();
+    var state = gateway.GetStateAsync(creds, "2.0.2", 6, "abc").GetAwaiter().GetResult();
     True(state.Ok, "state ok");
     Eq("OK", state.Codigo, "state codigo");
     Eq(2, state.CatalogSchemaVersion, "state schema");
-    True(gateway.ConfirmCatalogAsync(creds, "2.0.1", 6, "abc").GetAwaiter().GetResult(), "confirm catalog");
-    var upload = gateway.UploadSnapshotAsync(creds, "2.0.1", new SnapshotDocument { SnapshotId = Guid.Parse("10000000-0000-4000-8000-000000000001") }).GetAwaiter().GetResult();
+    True(gateway.ConfirmCatalogAsync(creds, "2.0.2", 6, "abc").GetAwaiter().GetResult(), "confirm catalog");
+    var upload = gateway.UploadSnapshotAsync(creds, "2.0.2", new SnapshotDocument { SnapshotId = Guid.Parse("10000000-0000-4000-8000-000000000001") }).GetAwaiter().GetResult();
     True(upload.Accepted, "upload accepted");
     Eq("OK", upload.Codigo, "upload codigo");
     Eq(3, upload.StockRows, "stock rows");
