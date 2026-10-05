@@ -16,7 +16,7 @@ public sealed class SupabaseGateway : IDataBaseGateway, IDisposable
         _baseUrl = (baseUrl ?? DefaultBaseUrl).TrimEnd('/');
         _http = handler is null ? new HttpClient() : new HttpClient(handler);
         _http.Timeout = TimeSpan.FromSeconds(20);
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd("ConeXion/2.0.1");
+        _http.DefaultRequestHeaders.UserAgent.ParseAdd("ConeXion/2.0.2");
     }
 
     public async Task<DataBaseHealth> CheckHealthAsync(CancellationToken ct = default)
