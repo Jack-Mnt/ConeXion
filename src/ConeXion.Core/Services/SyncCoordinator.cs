@@ -172,7 +172,7 @@ public sealed class SyncCoordinator
         {
             "INVALID_CREDENTIALS" => "Las credenciales de esta instalación no son válidas.",
             "INSTALLATION_DISABLED" => "Esta instalación está deshabilitada en Supabase.",
-            "CATALOG_SCHEMA_NOT_SUPPORTED" => "El schema de catálogo publicado no es compatible con ConeXion 2.0.2.",
+            "CATALOG_SCHEMA_NOT_SUPPORTED" => "El schema de catálogo publicado no es compatible con ConeXion 2.1.0.",
             "CATALOG_VERSION_NOT_AVAILABLE" => "Supabase no tiene disponible la versión de catálogo requerida.",
             "INTERNAL_ERROR" => "Supabase no pudo completar la consulta de estado.",
             _ => codigo
