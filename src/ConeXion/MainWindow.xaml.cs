@@ -419,30 +419,22 @@ public partial class MainWindow : Window
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         row.ColumnDefinitions.Add(new ColumnDefinition());
 
-        var badge = new Border
+        var index = new TextBlock
         {
-            Width = 24,
-            Height = 24,
-            CornerRadius = new CornerRadius(12),
-            Background = (Brush)FindResource("JmBrush.Primary"),
+            Text = $"{number}.",
+            Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
+            FontWeight = FontWeights.SemiBold,
             VerticalAlignment = VerticalAlignment.Top,
-            Child = new TextBlock
-            {
-                Text = number.ToString(),
-                Foreground = (Brush)FindResource("JmBrush.OnPrimary"),
-                FontWeight = FontWeights.SemiBold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            }
+            Margin = new Thickness(0, 2, 8, 0)
         };
-        row.Children.Add(badge);
+        row.Children.Add(index);
 
         var label = new TextBlock
         {
             Text = text,
             TextWrapping = TextWrapping.Wrap,
             Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
-            Margin = new Thickness(10, 2, 0, 0)
+            Margin = new Thickness(0, 2, 0, 0)
         };
         Grid.SetColumn(label, 1);
         row.Children.Add(label);
