@@ -5,7 +5,7 @@
 - Proyecto: SOLOG / ConeXion
 - Tipo: delta funcional
 - Clasificación: Nivel B — implementación funcional
-- Estado: IMPLEMENTADO — VALIDACIÓN TÉCNICA/HUMANA PENDIENTE
+- Estado: IMPLEMENTADO — VALIDACIÓN TÉCNICA APROBADA / SMOKE HUMANO PENDIENTE
 - Baseline: `Jack-Mnt/ConeXion` · rama `main`
 - HEAD previo: `f15145554d15b7fe7d0798bbb20f4d2fd060c7a7`
 - Versión objetivo: ConeXion 2.1.0
@@ -196,6 +196,12 @@ No se modificó Supabase ni el contrato JSON V2.
 
 ### Estado de validación
 
-La implementación y revisión estática están completadas. La ejecución de `VALIDAR-CONTRATO-V2.ps1` y `BUILD-PILOTO.ps1` queda pendiente en un entorno Windows con .NET 8, ya que el entorno de implementación actual no dispone del SDK .NET/WPF.
+Validación técnica aprobada en Windows:
+
+- `BUILD-PILOTO.ps1` ejecutó correctamente la suite `ConeXion.Validation`.
+- 19/19 validaciones aprobadas.
+- `ConeXion` 2.1.0 publicado correctamente para `win-x64`.
+- `ConeXion.Admin` 2.1.0 publicado correctamente para `win-x64`.
+- Sin errores de compilación.
 
 Smoke humano pendiente antes de cerrar el bloque.
