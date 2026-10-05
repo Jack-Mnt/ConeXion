@@ -107,7 +107,7 @@ public sealed class InventoryProcessor
 
             var name = r.ProductName.Trim();
             var barcode = NormalizeBarcode(r.Barcode);
-            var hasPrice = TryParseDecimal(r.PriceRaw, out var price);
+            var hasPrice = TryParsePrice(r.PriceRaw, out var price);
             var hasStock = TryParseWholeNumber(r.StockRaw, out var qty);
 
             if (!isKnown)
@@ -271,6 +271,26 @@ public sealed class InventoryProcessor
         var text = raw.Trim();
         return decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value)
             || decimal.TryParse(text, NumberStyles.Float, new CultureInfo("es-PE"), out value);
+    }
+
+    // Los números almacenados por Excel siguen semántica IEEE-754 y pueden aparecer
+    // en el XML con residuos como 2.2000000000000002 aunque Excel muestre 2.2.
+    // Excel trabaja con un máximo de 15 dígitos significativos; normalizamos la
+    // lectura de Precio venta a esa precisión antes de comparar o serializar.
+    private static bool TryParsePrice(string raw, out decimal value)
+    {
+        value = 0m;
+        var text = raw.Trim();
+        if (text.Length == 0) return false;
+
+        if (!(double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number)
+              || double.TryParse(text, NumberStyles.Float, new CultureInfo("es-PE"), out number))
+            || double.IsNaN(number)
+            || double.IsInfinity(number))
+            return false;
+
+        var normalized = number.ToString("G15", CultureInfo.InvariantCulture);
+        return decimal.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
     }
 
     private static string? ResolveStoreFromWarehouse(string? warehouse)
