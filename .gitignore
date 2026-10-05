@@ -1,0 +1,28 @@
+# .NET build outputs
+bin/
+obj/
+release/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build / test artifacts
+TestResults/
+artifacts/
+*.log
+
+# Local runtime data
+*.db
+*.db-shm
+*.db-wal
+credentials.dat
+config.json
+
+# OS
+Thumbs.db
+.DS_Store
