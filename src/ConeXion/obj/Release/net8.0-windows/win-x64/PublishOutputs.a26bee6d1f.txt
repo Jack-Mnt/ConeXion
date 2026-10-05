@@ -1,3 +1,0 @@
-C:\Dev\GitHub\ConeXion_2.0.1\release\ConeXion\ConeXion.pdb
-C:\Dev\GitHub\ConeXion_2.0.1\release\ConeXion\ConeXion.Core.pdb
-C:\Dev\GitHub\ConeXion_2.0.1\release\ConeXion\ConeXion.exe
