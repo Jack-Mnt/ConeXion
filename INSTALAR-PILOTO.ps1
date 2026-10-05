@@ -66,7 +66,7 @@ if (!(Test-Path $V2Marker)) {
     Set-Content -Path $V2Marker -Value 'contract_version=2;catalog_schema_version=2' -Encoding ASCII
 }
 
-Write-Host 'ConeXion 2.0.1 instalado correctamente.' -ForegroundColor Green
+Write-Host 'ConeXion 2.0.2 instalado correctamente.' -ForegroundColor Green
 if (Test-Path (Join-Path $Data 'config.json')) {
     Write-Host 'Credenciales/configuración existentes conservadas. Al abrir ConeXion se descargará y confirmará el catálogo schema V2.' -ForegroundColor Green
 } else {
