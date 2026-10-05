@@ -9,7 +9,7 @@ namespace ConeXion.Admin;
 
 public partial class MainWindow : Window
 {
-    private const string AppVersion = "2.0.2";
+    private const string AppVersion = "2.1.0";
     private readonly ConeXionRuntime _runtime = new(AppPaths.Production());
     private ProvisioningTxt? _pendingTxt;
 
