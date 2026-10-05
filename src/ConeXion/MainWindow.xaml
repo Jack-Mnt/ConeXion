@@ -138,7 +138,7 @@
             <Grid Margin="28,0">
                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                 <TextBlock Text="Built by Jack Mnt" Foreground="{StaticResource JmBrush.TextSecondary}" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="Versión 2.0.1" Foreground="{StaticResource JmBrush.TextSecondary}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Versión 2.0.2" Foreground="{StaticResource JmBrush.TextSecondary}" VerticalAlignment="Center" />
             </Grid>
         </Border>
     </Grid>
