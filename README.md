@@ -18,11 +18,13 @@ No existe compatibilidad operativa con snapshots o catálogos schema 1.
 ## Arquitectura preservada
 
 ```text
-Excel → XlsxReader → InventoryProcessor → SQLite Pending
-      → SyncCoordinator → SupabaseGateway → Supabase
+Excel → XlsxReader → InventoryProcessor → SnapshotUsabilityValidator
+      → SQLite Pending → SyncCoordinator → SupabaseGateway → Supabase
 ```
 
-La aplicación sigue siendo event-driven: sincroniza al iniciar, antes de cargar un Excel y después de procesarlo. No usa polling ni reintentos en segundo plano.
+Antes de crear un `Pending`, ConeXion comprueba que todos los SKU incluidos tengan stock teórico resoluble. `producto_ausente` se resuelve como `0`; observaciones sin stock resoluble, como `codigo_interno_duplicado` y `stock_invalido`, bloquean localmente el archivo y nunca se envían a Supabase.
+
+`SyncCoordinator` repite la misma validación antes del upload para proteger pendientes creados por versiones anteriores. La aplicación sigue siendo event-driven: sincroniza al iniciar, antes de cargar un Excel y después de procesarlo. No usa polling ni reintentos en segundo plano.
 
 ## Catálogo
 
