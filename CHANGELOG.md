@@ -6,7 +6,8 @@
 - `producto_ausente` continúa resolviéndose como stock `0` y no bloquea.
 - `codigo_interno_duplicado` y `stock_invalido` quedan bloqueados porque no permiten resolver un stock teórico.
 - La regla se expresa por resolubilidad de `eliminados[]`: cualquier motivo futuro sin semántica explícita de stock bloquea por defecto.
-- Añade un `ResultPanel` persistente con detalle del error y CTA **Cargar otro Excel**.
+- Añade un `ResultPanel` persistente en dos columnas: errores seleccionables a la izquierda y solución contextual a la derecha.
+- Reemplaza el CTA de recarga por una **X** que vuelve al panel de carga; la selección se comunica resaltando la tarjeta completa.
 - Añade defensa en `SyncCoordinator` para impedir que pendientes legacy no utilizables alcancen Supabase.
 - Mueve la comprobación preventiva de la ventana de dos horas después de la validación local.
 - No modifica Supabase, SOLOG, Motor ni el contrato JSON V2.
