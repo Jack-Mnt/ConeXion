@@ -1,10 +1,10 @@
-# ConeXion 2.0.1
+# ConeXion 2.0.2
 
 ConeXion transforma el Excel de stock del POS en snapshots normalizados y los sincroniza con Supabase para SOLOG.
 
 ## Contrato de esta versión
 
-ConeXion 2.0.1 trabaja exclusivamente con:
+ConeXion 2.0.2 trabaja exclusivamente con:
 
 - `catalog_schema_version = 2`
 - `contract_version = 2`
