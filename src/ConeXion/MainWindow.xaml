@@ -128,7 +128,7 @@
                             <TextBlock x:Name="ProgressFile" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" Margin="0,20,0,0" />
                         </StackPanel>
 
-                        <Grid x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="8,0">
+                        <Grid x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="8,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
