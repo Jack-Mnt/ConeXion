@@ -1,5 +1,12 @@
 # Changelog — ConeXion
 
+## 2.0.2 — Normalización de precios Excel
+
+- Corrige falsos `precio_modificado` causados por residuos IEEE-754 del XLSX, por ejemplo `2.2000000000000002` frente a `2.2`.
+- Normaliza `Precio venta` a la precisión significativa efectiva de Excel antes de comparar o serializar.
+- Añade una prueba de regresión específica para el caso detectado en `StockCutervo16-09.xlsx`.
+- No modifica el contrato V2 ni el backend Supabase.
+
 ## 2.0.1 — Corrección E2E de incidencias de código de barras
 
 - Corrige falsos `codigo_barras_modificado` cuando catálogo y Excel solo difieren por espacios internos.
