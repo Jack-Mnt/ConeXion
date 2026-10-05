@@ -21,6 +21,33 @@
             <Setter Property="Padding" Value="16,10" />
             <Setter Property="Cursor" Value="Hand" />
         </Style>
+        <Style x:Key="BlockingCardButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource JmBrush.Surface}" />
+            <Setter Property="BorderBrush" Value="{StaticResource JmBrush.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource JmBrush.Primary}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -101,15 +128,59 @@
                             <TextBlock x:Name="ProgressFile" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" Margin="0,20,0,0" />
                         </StackPanel>
 
-                        <StackPanel x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Width="680">
-                            <TextBlock x:Name="ResultTitle" Text="" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" TextAlignment="Center" />
-                            <TextBlock x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,18" />
+                        <StackPanel x:Name="ResultPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="8,0">
+                            <Grid>
+                                <TextBlock x:Name="ResultTitle" Text="" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.TextPrimary}" TextAlignment="Center" />
+                                <Button x:Name="ResultCloseButton" Visibility="Collapsed" Content="×" Click="ResultCloseButton_Click"
+                                        HorizontalAlignment="Right" VerticalAlignment="Top" Width="34" Height="34"
+                                        Background="Transparent" BorderThickness="0" FontSize="24"
+                                        Foreground="{StaticResource JmBrush.TextPrimary}" Cursor="Hand"
+                                        ToolTip="Cerrar y cargar otro archivo" />
+                            </Grid>
+                            <TextBlock x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="36,8,36,18" />
                             <TextBlock x:Name="ResultSummary" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" />
-                            <ScrollViewer x:Name="ResultDetailsScroll" Visibility="Collapsed" MaxHeight="180" VerticalScrollBarVisibility="Auto" Margin="0,0,0,18">
-                                <StackPanel x:Name="ResultDetailsPanel" />
-                            </ScrollViewer>
-                            <Button x:Name="ResultActionButton" Visibility="Collapsed" Style="{StaticResource PrimaryButton}" Click="ResultActionButton_Click"
-                                    Content="Cargar otro Excel" Height="46" MinWidth="220" HorizontalAlignment="Center" />
+
+                            <Grid x:Name="BlockingResultGrid" Visibility="Collapsed">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1.08*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0" Margin="0,0,18,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Corrige estos errores para continuar"
+                                               FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{StaticResource JmBrush.TextPrimary}"
+                                               Margin="0,0,0,10" />
+                                    <ScrollViewer Grid.Row="1" MaxHeight="190" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel x:Name="BlockingErrorsPanel" />
+                                    </ScrollViewer>
+                                </Grid>
+
+                                <Border Grid.Column="1" BorderBrush="{StaticResource JmBrush.Border}" BorderThickness="1,0,0,0" Padding="18,0,0,0">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text="Cómo solucionarlos:"
+                                                   FontSize="16" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource JmBrush.TextPrimary}"
+                                                   Margin="0,0,0,10" />
+                                        <Border Grid.Row="1" Background="{StaticResource JmBrush.SurfaceAlt}"
+                                                BorderBrush="{StaticResource JmBrush.Border}" BorderThickness="1"
+                                                CornerRadius="10" Padding="14">
+                                            <ScrollViewer MaxHeight="190" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="BlockingSolutionPanel" />
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
                             <TextBlock x:Name="CountdownText" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.Primary}" HorizontalAlignment="Center" Margin="0,16,0,0" />
                         </StackPanel>
                     </Grid>
