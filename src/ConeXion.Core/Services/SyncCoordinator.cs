@@ -124,6 +124,20 @@ public sealed class SyncCoordinator
                 break;
             }
 
+            // Defensa para pendientes creados por versiones anteriores: un snapshot
+            // con stock no resoluble nunca debe alcanzar Supabase.
+            var usability = SnapshotUsabilityValidator.Validate(snapshot, local);
+            if (!usability.IsUsable)
+            {
+                var detail = string.Join(", ", usability.Blockers.Select(x => $"{x.CInterno}:{x.Motivo}"));
+                await _db.MarkStatusAsync(
+                    snapshot.SnapshotId,
+                    LocalSnapshotStatus.Failed,
+                    $"LOCAL_SNAPSHOT_NOT_USABLE{(detail.Length == 0 ? "" : $": {detail}")}",
+                    ct);
+                continue;
+            }
+
             var reply = await _gateway.UploadSnapshotAsync(creds, appVersion, snapshot, ct);
             if (!reply.Accepted && !reply.Duplicate)
             {
