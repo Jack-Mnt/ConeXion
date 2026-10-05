@@ -268,6 +268,7 @@ public partial class MainWindow : Window
         ProgressPanel.Visibility=Visibility.Collapsed;
         ReadyPanel.Visibility=Visibility.Collapsed;
         ResultPanel.Visibility=Visibility.Visible;
+        ResultPanel.VerticalAlignment=VerticalAlignment.Stretch;
 
         ResultTitle.Text="No se puede actualizar el inventario";
         ResultTitle.Foreground=(Brush)FindResource("JmBrush.TextPrimary");
@@ -491,6 +492,7 @@ public partial class MainWindow : Window
         _blockingErrorCards.Clear();
         BlockingResultGrid.Visibility=Visibility.Collapsed;
         ResultCloseButton.Visibility=Visibility.Collapsed;
+        ResultPanel.VerticalAlignment=VerticalAlignment.Center;
         ResultTitle.TextAlignment=TextAlignment.Center;
         ResultSubtitle.TextAlignment=TextAlignment.Center;
         CountdownText.Visibility=Visibility.Visible;
