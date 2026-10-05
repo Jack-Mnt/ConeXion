@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
@@ -495,7 +496,11 @@ public partial class MainWindow : Window
         ResultPanel.VerticalAlignment=VerticalAlignment.Center;
         ResultTitle.TextAlignment=TextAlignment.Center;
         ResultSubtitle.TextAlignment=TextAlignment.Center;
-        CountdownText.Visibility=Visibility.Visible;
+        ResultSubtitle.Foreground=(Brush)FindResource("JmBrush.TextSecondary");
+        SuccessMessageText.Text="";
+        SuccessMessageText.Visibility=Visibility.Collapsed;
+        CountdownText.Text="05:00";
+        CountdownCard.Visibility=Visibility.Collapsed;
     }
 
     private void ShowPendingConnectionFailure(SnapshotDocument s,string? detail)
@@ -503,16 +508,53 @@ public partial class MainWindow : Window
         ResetResultDetails();
         ProgressPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Visible;
         ResultTitle.Text="No se ha podido cargar el inventario por fallo en la conexión.";ResultTitle.Foreground=(Brush)FindResource("JmBrush.Warning");
-        ResultSubtitle.Text=string.IsNullOrWhiteSpace(detail)?"El inventario quedó guardado localmente.":detail;ResultSummary.Text=BuildSummary(s);CountdownText.Text="";CountdownText.Visibility=Visibility.Collapsed;
+        ResultSubtitle.Text=string.IsNullOrWhiteSpace(detail)?"El inventario quedó guardado localmente.":detail;
+        ResultSummary.Text=BuildSummary(s);
     }
+
     private async Task ShowSuccessAndCloseAsync(SnapshotDocument s)
     {
         ResetResultDetails();
-        ProgressPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Visible;
-        ResultTitle.Foreground=(Brush)FindResource("JmBrush.Success");ResultTitle.Text="Exportación correcta, se autodestruirá en 5 segundos...";
-        ResultSubtitle.Text=s.Incidencias.Count==0?"":"Se detectaron incidencias y fueron registradas para revisión.";ResultSummary.Text=BuildSummary(s);CountdownText.Visibility=Visibility.Visible;
-        for(int i=5;i>=1;i--){CountdownText.Text=i.ToString();await Task.Delay(1000);}
-        _allowClose=true;Close();
+        ProgressPanel.Visibility=Visibility.Collapsed;
+        ReadyPanel.Visibility=Visibility.Collapsed;
+        ResultPanel.Visibility=Visibility.Visible;
+
+        ResultTitle.Foreground=(Brush)FindResource("JmBrush.Success");
+        ResultTitle.Text="Exportación correcta";
+
+        ResultSubtitle.Foreground=(Brush)FindResource("JmBrush.Error");
+        ResultSubtitle.Text="Este mensaje se autodestruirá en 5 segundos";
+
+        SuccessMessageText.Text=s.Incidencias.Count==0
+            ? ""
+            : "Se detectaron incidencias y fueron registradas para revisión.";
+        SuccessMessageText.Visibility=string.IsNullOrWhiteSpace(SuccessMessageText.Text)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        ResultSummary.Text=BuildSummary(s);
+        CountdownText.Text="05:00";
+        CountdownCard.Visibility=Visibility.Visible;
+
+        // Pausa de lectura antes de iniciar la cuenta regresiva.
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        var timer=Stopwatch.StartNew();
+        var duration=TimeSpan.FromSeconds(5);
+
+        while(timer.Elapsed<duration)
+        {
+            var remaining=duration-timer.Elapsed;
+            var totalCentiseconds=Math.Max(0,(int)Math.Ceiling(remaining.TotalMilliseconds/10d));
+            var seconds=totalCentiseconds/100;
+            var centiseconds=totalCentiseconds%100;
+            CountdownText.Text=$"{seconds:00}:{centiseconds:00}";
+            await Task.Delay(10);
+        }
+
+        CountdownText.Text="00:00";
+        _allowClose=true;
+        Close();
     }
     private static string BuildSummary(SnapshotDocument s)=>$"SKU Excel: {s.Resumen.SkuTotalExcel:N0}   ·   Catálogo: {s.Resumen.SkuCatalogo:N0}   ·   Excluidos: {s.Resumen.SkuExcluidos:N0}\nStock ≠ 0: {s.Resumen.SkuStockNoCero:N0}   ·   Stock cero: {s.Resumen.SkuStockCero:N0}   ·   Sin observación válida: {s.Resumen.SkuEliminados:N0}   ·   Incidencias: {s.Resumen.IncidenciasTotal:N0}";
 
