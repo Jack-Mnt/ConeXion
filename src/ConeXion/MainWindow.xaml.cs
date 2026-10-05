@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using Microsoft.Win32;
 using ConeXion.Core.Models;
@@ -12,7 +13,7 @@ namespace ConeXion;
 
 public partial class MainWindow : Window
 {
-    private const string AppVersion = "2.0.2";
+    private const string AppVersion = "2.1.0";
     private readonly ConeXionRuntime _runtime = new(AppPaths.Production());
     private CatalogDocument? _catalog;
     private InstallationConfig? _installation;
@@ -69,8 +70,6 @@ public partial class MainWindow : Window
             if (pre.DataBaseAvailable && !string.IsNullOrWhiteSpace(pre.Message))
                 throw new InvalidDataException(pre.Message);
 
-            await EnsureSnapshotWindowOpenAsync(pre);
-
             var progress = new Progress<string>(m =>
             {
                 var step = m.Contains("Comparando",StringComparison.OrdinalIgnoreCase)?2:m.Contains("Preparando",StringComparison.OrdinalIgnoreCase)?3:1;
@@ -78,8 +77,19 @@ public partial class MainWindow : Window
             });
             var result = await Task.Run(() => _runtime.Processor.Process(path, _catalog, _installation.StoreName, progress));
 
+            var usability = SnapshotUsabilityValidator.Validate(result.Snapshot, _catalog);
+            if (!usability.IsUsable)
+            {
+                ShowUnusableSnapshot(usability);
+                return;
+            }
+
             if (await _runtime.LocalDb.SnapshotHashExistsAsync(_installation.StoreName, result.Snapshot.ExcelHash))
                 throw new InvalidDataException("Este archivo ya fue importado.");
+
+            // La ventana de 2 horas solo se evalúa después de confirmar que el archivo
+            // es estructuralmente utilizable. Un Excel inválido nunca debe consumirla.
+            await EnsureSnapshotWindowOpenAsync(pre);
 
             await _runtime.LocalDb.SaveSnapshotAsync(result.Snapshot, LocalSnapshotStatus.Pending);
 
@@ -112,11 +122,21 @@ public partial class MainWindow : Window
         finally { _busy=false; if(!_allowClose) SetInputEnabled(_catalog is not null && _installation?.Provisioned==true); }
     }
 
-    private void SelectFileButton_Click(object sender,RoutedEventArgs e)
+    private void SelectFileButton_Click(object sender,RoutedEventArgs e) => OpenFilePicker();
+
+    private void ResultActionButton_Click(object sender, RoutedEventArgs e) => OpenFilePicker();
+
+    private void OpenFilePicker()
     {
-        if(_busy||_catalog is null)return;
-        var d=new OpenFileDialog{Title="Seleccionar inventario",Filter="Archivos Excel (*.xlsx)|*.xlsx",CheckFileExists=true};
-        if(d.ShowDialog(this)==true)_=ProcessFileAsync(d.FileName);
+        if (_busy || _catalog is null) return;
+        var d = new OpenFileDialog
+        {
+            Title = "Seleccionar inventario",
+            Filter = "Archivos Excel (*.xlsx)|*.xlsx",
+            CheckFileExists = true
+        };
+        if (d.ShowDialog(this) == true)
+            _ = ProcessFileAsync(d.FileName);
     }
 
     private void DropZone_DragEnter(object sender,DragEventArgs e)
@@ -224,20 +244,177 @@ public partial class MainWindow : Window
 
     private void ShowProgress(string title,string file,int step)
     {
+        ResetResultDetails();
         ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Collapsed;ProgressPanel.Visibility=Visibility.Visible;
         ProgressTitle.Text=title;ProgressFile.Text=file;
         var all=new[]{Step1,Step2,Step3,Step4,Step5};
         for(var i=0;i<all.Length;i++){all[i].Foreground=i+1<=step?(Brush)FindResource("JmBrush.Primary"):(Brush)FindResource("JmBrush.TextDisabled");all[i].FontWeight=i+1==step?FontWeights.SemiBold:FontWeights.Normal;}
     }
-    private void ShowReady(){ProgressPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Visible;}
+
+    private void ShowReady()
+    {
+        ResetResultDetails();
+        ProgressPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Visible;
+    }
+
+    private void ShowUnusableSnapshot(SnapshotUsabilityResult usability)
+    {
+        ProgressPanel.Visibility=Visibility.Collapsed;
+        ReadyPanel.Visibility=Visibility.Collapsed;
+        ResultPanel.Visibility=Visibility.Visible;
+        ResultTitle.Text="No se puede actualizar el inventario";
+        ResultTitle.Foreground=(Brush)FindResource("JmBrush.Warning");
+        ResultSubtitle.Text="El archivo contiene errores que impedirían iniciar un conteo en SOLOG. Corrígelos antes de continuar.";
+        ResultSummary.Text="";
+        CountdownText.Text="";
+
+        ResultDetailsPanel.Children.Clear();
+        foreach (var blocker in usability.Blockers)
+            ResultDetailsPanel.Children.Add(BuildBlockingCard(blocker));
+
+        ResultDetailsScroll.Visibility=Visibility.Visible;
+        ResultActionButton.Visibility=Visibility.Visible;
+        ResultActionButton.IsEnabled=true;
+    }
+
+    private Border BuildBlockingCard(SnapshotUsabilityBlocker blocker)
+    {
+        var content = new StackPanel();
+
+        var product = new TextBlock
+        {
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
+            FontSize = 15
+        };
+        product.Inlines.Add(new Run($"Código {blocker.CInterno} — ") { FontWeight = FontWeights.SemiBold });
+        product.Inlines.Add(new Run(blocker.Producto));
+        content.Children.Add(product);
+
+        content.Children.Add(new TextBlock
+        {
+            Text = BlockerTitle(blocker.Motivo),
+            FontWeight = FontWeights.SemiBold,
+            Foreground = (Brush)FindResource("JmBrush.Warning"),
+            Margin = new Thickness(0, 6, 0, 8)
+        });
+
+        if (blocker.Observations.Count > 0)
+        {
+            content.Children.Add(new TextBlock
+            {
+                Text = "Encontrado en:",
+                FontWeight = FontWeights.SemiBold,
+                Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
+                Margin = new Thickness(0, 0, 0, 4)
+            });
+
+            foreach (var observation in blocker.Observations)
+            {
+                var row = observation.Row.HasValue ? $"Fila {observation.Row.Value}" : "Fila no identificada";
+                var value = string.IsNullOrWhiteSpace(observation.Value) ? "(vacío)" : observation.Value;
+                var detail = blocker.Motivo == "codigo_interno_duplicado"
+                    ? $"• {row} — stock {value}"
+                    : blocker.Motivo == "stock_invalido"
+                        ? $"• {row} — valor encontrado: {value}"
+                        : $"• {row} — {value}";
+
+                content.Children.Add(new TextBlock
+                {
+                    Text = detail,
+                    TextWrapping = TextWrapping.Wrap,
+                    Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
+                    Margin = new Thickness(0, 0, 0, 3)
+                });
+            }
+        }
+
+        content.Children.Add(new TextBlock
+        {
+            Text = "Cómo solucionarlo:",
+            FontWeight = FontWeights.SemiBold,
+            Foreground = (Brush)FindResource("JmBrush.TextPrimary"),
+            Margin = new Thickness(0, 10, 0, 4)
+        });
+
+        foreach (var step in BlockerResolutionSteps(blocker))
+        {
+            content.Children.Add(new TextBlock
+            {
+                Text = step,
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = (Brush)FindResource("JmBrush.TextSecondary"),
+                Margin = new Thickness(0, 0, 0, 3)
+            });
+        }
+
+        return new Border
+        {
+            Background = (Brush)FindResource("JmBrush.SurfaceAlt"),
+            BorderBrush = (Brush)FindResource("JmBrush.Border"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Padding = new Thickness(14),
+            Margin = new Thickness(0, 0, 0, 12),
+            Child = content
+        };
+    }
+
+    private static string BlockerTitle(string reason)
+        => reason switch
+        {
+            "codigo_interno_duplicado" => "Código interno duplicado",
+            "stock_invalido" => "Stock inválido",
+            _ => "Stock no resoluble"
+        };
+
+    private static IReadOnlyList<string> BlockerResolutionSteps(SnapshotUsabilityBlocker blocker)
+        => blocker.Motivo switch
+        {
+            "codigo_interno_duplicado" =>
+            [
+                "1. Abre Tumisoft.",
+                $"2. Busca el código interno {blocker.CInterno}.",
+                "3. Corrige el código interno de los códigos duplicados.",
+                "4. Guarda los cambios y descarga el inventario nuevamente.",
+                "5. Carga el nuevo Excel en ConeXion."
+            ],
+            "stock_invalido" =>
+            [
+                "1. Abre el archivo de inventario.",
+                blocker.Observations.FirstOrDefault()?.Row is int row
+                    ? $"2. Ve a la fila {row}."
+                    : "2. Ve a la fila indicada.",
+                "3. Corrige el valor de Stock para que sea un NÚMERO ENTERO VÁLIDO.",
+                "4. No elimines el producto ni cambies su código interno.",
+                "5. Guarda el archivo y vuelve a cargarlo en ConeXion."
+            ],
+            _ =>
+            [
+                "1. Revisa el producto indicado en el archivo de inventario.",
+                "2. Corrige el dato que impide determinar un stock válido.",
+                "3. Guarda el archivo y vuelve a cargarlo en ConeXion."
+            ]
+        };
+
+    private void ResetResultDetails()
+    {
+        ResultDetailsPanel.Children.Clear();
+        ResultDetailsScroll.Visibility=Visibility.Collapsed;
+        ResultActionButton.Visibility=Visibility.Collapsed;
+        ResultActionButton.IsEnabled=false;
+    }
+
     private void ShowPendingConnectionFailure(SnapshotDocument s,string? detail)
     {
+        ResetResultDetails();
         ProgressPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Visible;
         ResultTitle.Text="No se ha podido cargar el inventario por fallo en la conexión.";ResultTitle.Foreground=(Brush)FindResource("JmBrush.Warning");
         ResultSubtitle.Text=string.IsNullOrWhiteSpace(detail)?"El inventario quedó guardado localmente.":detail;ResultSummary.Text=BuildSummary(s);CountdownText.Text="";
     }
     private async Task ShowSuccessAndCloseAsync(SnapshotDocument s)
     {
+        ResetResultDetails();
         ProgressPanel.Visibility=Visibility.Collapsed;ReadyPanel.Visibility=Visibility.Collapsed;ResultPanel.Visibility=Visibility.Visible;
         ResultTitle.Foreground=(Brush)FindResource("JmBrush.Success");ResultTitle.Text="Exportación correcta, se autodestruirá en 5 segundos...";
         ResultSubtitle.Text=s.Incidencias.Count==0?"":"Se detectaron incidencias y fueron registradas para revisión.";ResultSummary.Text=BuildSummary(s);
