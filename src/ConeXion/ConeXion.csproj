@@ -7,9 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>ConeXion</AssemblyName>
     <RootNamespace>ConeXion</RootNamespace>
-    <Version>2.0.2</Version>
-    <AssemblyVersion>2.0.2.0</AssemblyVersion>
-    <FileVersion>2.0.2.0</FileVersion>
+    <Version>2.1.0</Version>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <FileVersion>2.1.0.0</FileVersion>
       <ApplicationIcon>ConeXion.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
