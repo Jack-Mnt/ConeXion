@@ -19,6 +19,11 @@ var tests = new (string Name, Action Test)[]
     ("InventoryProcessor normaliza residuos binarios de precio Excel", InventoryProcessorNormalizesExcelPriceArtifact),
     ("InventoryProcessor producto_nuevo nunca entra en stock", InventoryProcessorNewProductsOnlyIncident),
     ("InventoryProcessor rechaza precio negativo de producto nuevo", InventoryProcessorRejectsNegativeNewPrice),
+    ("SnapshotUsability permite snapshot resoluble", SnapshotUsabilityAllowsResolvedStock),
+    ("SnapshotUsability permite producto ausente como cero", SnapshotUsabilityAllowsMissingProduct),
+    ("SnapshotUsability bloquea código interno duplicado", SnapshotUsabilityBlocksDuplicate),
+    ("SnapshotUsability bloquea stock inválido", SnapshotUsabilityBlocksInvalidStock),
+    ("SnapshotUsability bloquea por defecto motivos no resolubles", SnapshotUsabilityBlocksUnknownDeletedReason),
     ("Serialización V2 no contiene ignorados", SerializationIsExactV2),
     ("SupabaseGateway consume estado plano y codigo", GatewayUsesV2Contracts),
 };
@@ -288,6 +293,122 @@ static void InventoryProcessorRejectsNegativeNewPrice()
         Row("HUACA", "NUEVO", "21500", "", "-1", "3"));
     try { Throws<InvalidDataException>(() => new InventoryProcessor().Process(file, catalog, "Huaca")); }
     finally { File.Delete(file); }
+}
+
+
+static void SnapshotUsabilityAllowsResolvedStock()
+{
+    var snapshot = new SnapshotDocument
+    {
+        Stock = [new StockItem { CInterno = 20101, Stock = -4 }],
+        Incidencias =
+        [
+            new Incident
+            {
+                CInterno = 20101,
+                Tipo = "precio_modificado",
+                Datos = new() { ["anterior"] = 1m, ["nuevo"] = 1.5m }
+            }
+        ]
+    };
+
+    var result = SnapshotUsabilityValidator.Validate(snapshot, CatalogOne(20101, "A", "1", 1m));
+    True(result.IsUsable, "stock conocido y cambios administrativos deben ser utilizables");
+    Eq(0, result.Blockers.Count, "blockers snapshot resoluble");
+}
+
+static void SnapshotUsabilityAllowsMissingProduct()
+{
+    var snapshot = new SnapshotDocument
+    {
+        Eliminados = [new DeletedProduct { CInterno = 20101, Motivo = "producto_ausente" }],
+        Incidencias =
+        [
+            new Incident { CInterno = 20101, Tipo = "producto_ausente", Datos = new() { ["producto"] = "A" } }
+        ]
+    };
+
+    var result = SnapshotUsabilityValidator.Validate(snapshot, CatalogOne(20101, "A", "1", 1m));
+    True(result.IsUsable, "producto_ausente debe resolverse como stock 0");
+    True(SnapshotUsabilityValidator.TryResolveDeletedStock(snapshot.Eliminados[0], out var stock), "producto_ausente resoluble");
+    Eq(0, stock, "producto_ausente stock lógico");
+}
+
+static void SnapshotUsabilityBlocksDuplicate()
+{
+    var snapshot = new SnapshotDocument
+    {
+        Eliminados = [new DeletedProduct { CInterno = 20362, Motivo = "codigo_interno_duplicado" }],
+        Incidencias =
+        [
+            new Incident
+            {
+                CInterno = 20362,
+                Tipo = "codigo_interno_duplicado",
+                Datos = new()
+                {
+                    ["filas"] = new[] { 265, 906 },
+                    ["valores_stock"] = new string?[] { "0", "7" },
+                    ["producto"] = "CASINO CAFE VIBES"
+                }
+            }
+        ]
+    };
+
+    // SyncCoordinator valida payloads deserializados de SQLite; este roundtrip
+    // cubre también la lectura de datos como JsonElement.
+    var persisted = SnapshotExporter.Deserialize(SnapshotExporter.SerializeCompact(snapshot));
+    var catalog = CatalogOne(20362, "CASINO CAFE VIBES", "1", 1m);
+    var result = SnapshotUsabilityValidator.Validate(persisted, catalog);
+
+    True(!result.IsUsable, "duplicado debe bloquear");
+    var blocker = Single(result.Blockers, x => x.CInterno == 20362);
+    Eq("codigo_interno_duplicado", blocker.Motivo, "motivo duplicado");
+    Eq("CASINO CAFE VIBES", blocker.Producto, "producto duplicado");
+    Eq(2, blocker.Observations.Count, "observaciones duplicado");
+    Eq(265, blocker.Observations[0].Row, "fila duplicado 1");
+    Eq("0", blocker.Observations[0].Value, "stock duplicado 1");
+    Eq(906, blocker.Observations[1].Row, "fila duplicado 2");
+    Eq("7", blocker.Observations[1].Value, "stock duplicado 2");
+}
+
+static void SnapshotUsabilityBlocksInvalidStock()
+{
+    var snapshot = new SnapshotDocument
+    {
+        Eliminados = [new DeletedProduct { CInterno = 20101, Motivo = "stock_invalido" }],
+        Incidencias =
+        [
+            new Incident
+            {
+                CInterno = 20101,
+                Tipo = "stock_invalido",
+                Datos = new()
+                {
+                    ["fila"] = 55,
+                    ["producto"] = "A",
+                    ["valor_original"] = "7 unidades"
+                }
+            }
+        ]
+    };
+
+    var result = SnapshotUsabilityValidator.Validate(snapshot, CatalogOne(20101, "A", "1", 1m));
+    True(!result.IsUsable, "stock inválido debe bloquear");
+    var blocker = Single(result.Blockers, x => x.CInterno == 20101);
+    Eq(55, blocker.Observations[0].Row, "fila stock inválido");
+    Eq("7 unidades", blocker.Observations[0].Value, "valor stock inválido");
+}
+
+static void SnapshotUsabilityBlocksUnknownDeletedReason()
+{
+    var snapshot = new SnapshotDocument
+    {
+        Eliminados = [new DeletedProduct { CInterno = 20101, Motivo = "motivo_futuro_sin_resolucion" }]
+    };
+
+    var result = SnapshotUsabilityValidator.Validate(snapshot, CatalogOne(20101, "A", "1", 1m));
+    True(!result.IsUsable, "un motivo futuro sin semántica de stock debe bloquear por defecto");
 }
 
 static void SerializationIsExactV2()
