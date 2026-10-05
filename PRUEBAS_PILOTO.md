@@ -1,10 +1,10 @@
-# Pruebas reales — ConeXion 2.0.2
+# Pruebas reales — ConeXion 2.1.0
 
 ## 1. Inicio y catálogo V2
 
 - abrir ConeXion con una instalación aprovisionada;
 - comprobar sede correcta;
-- comprobar versión `2.0.2`;
+- comprobar versión `2.1.0`;
 - comprobar descarga automática de catálogo V6/schema 2 cuando no existe catálogo local;
 - cerrar y abrir de nuevo: con catálogo/hash vigentes debe reutilizarlo correctamente.
 
@@ -43,7 +43,7 @@ Probar de forma controlada:
 
 Verificar que ConeXion impida una nueva captura cuando todavía no corresponde y que el backend siga siendo autoritativo.
 
-## Regresión 2.0.2 — precio Excel
+## Regresión 2.1.0 — precio Excel
 
 Con un archivo que contenga internamente `2.2000000000000002` pero cuyo valor de negocio sea `2.2`:
 
