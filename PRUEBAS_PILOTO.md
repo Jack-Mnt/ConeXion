@@ -1,10 +1,10 @@
-# Pruebas reales — ConeXion 2.0.1
+# Pruebas reales — ConeXion 2.0.2
 
 ## 1. Inicio y catálogo V2
 
 - abrir ConeXion con una instalación aprovisionada;
 - comprobar sede correcta;
-- comprobar versión `2.0.1`;
+- comprobar versión `2.0.2`;
 - comprobar descarga automática de catálogo V6/schema 2 cuando no existe catálogo local;
 - cerrar y abrir de nuevo: con catálogo/hash vigentes debe reutilizarlo correctamente.
 
@@ -42,3 +42,11 @@ Probar de forma controlada:
 ## 5. Ventana de 2 horas
 
 Verificar que ConeXion impida una nueva captura cuando todavía no corresponde y que el backend siga siendo autoritativo.
+
+## Regresión 2.0.2 — precio Excel
+
+Con un archivo que contenga internamente `2.2000000000000002` pero cuyo valor de negocio sea `2.2`:
+
+- no debe generarse `precio_modificado` contra un catálogo con precio `2.2`;
+- el snapshot debe poder enviarse sin `INCIDENT_INVALID` por ese motivo;
+- un cambio real, por ejemplo `2.2 → 2.5`, debe seguir generando `precio_modificado`.
