@@ -12,7 +12,7 @@ namespace ConeXion;
 
 public partial class MainWindow : Window
 {
-    private const string AppVersion = "2.0.1";
+    private const string AppVersion = "2.0.2";
     private readonly ConeXionRuntime _runtime = new(AppPaths.Production());
     private CatalogDocument? _catalog;
     private InstallationConfig? _installation;
