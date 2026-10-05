@@ -10,6 +10,8 @@
 - Reemplaza el CTA de recarga por una **X** que vuelve al panel de carga; la selección se comunica resaltando la tarjeta completa.
 - Añade defensa en `SyncCoordinator` para impedir que pendientes legacy no utilizables alcancen Supabase.
 - Mueve la comprobación preventiva de la ventana de dos horas después de la validación local.
+- Rediseña el estado de éxito: título **Exportación correcta**, aviso de autodestrucción en rojo y tarjeta inferior con cuenta regresiva `05:00 → 00:00` en centésimas.
+- La cuenta regresiva espera 2 segundos antes de iniciar y usa tiempo transcurrido real para evitar deriva.
 - No modifica Supabase, SOLOG, Motor ni el contrato JSON V2.
 
 ## 2.0.2 — Normalización de precios Excel
