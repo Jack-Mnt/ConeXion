@@ -1,5 +1,5 @@
 {
-  "version": "2.0.1",
+  "version": "2.0.2",
   "catalogo_incluido": false,
   "snapshot_min_interval_hours": 2,
   "snapshot_time_basis": "capturado_at",
@@ -7,5 +7,6 @@
   "catalog_auto_update": true,
   "catalog_path": "C:/ProgramData/PuertoRico/ConeXion/Catalog",
   "catalog_schema_version": 2,
-  "snapshot_contract_version": 2
+  "snapshot_contract_version": 2,
+  "notes": "Corrección puntual de normalización de Precio venta para residuos IEEE-754 de Excel."
 }
