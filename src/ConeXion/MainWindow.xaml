@@ -133,6 +133,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
@@ -146,10 +147,13 @@
                                         ToolTip="Cerrar y cargar otro archivo" />
                             </Grid>
 
-                            <TextBlock Grid.Row="1" x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="36,8,36,18" />
-                            <TextBlock Grid.Row="2" x:Name="ResultSummary" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" />
+                            <TextBlock Grid.Row="1" x:Name="ResultSubtitle" Text="" FontSize="15" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" Margin="36,8,36,12" />
+                            <TextBlock Grid.Row="2" x:Name="SuccessMessageText" Text="" Visibility="Collapsed"
+                                       Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center"
+                                       TextWrapping="Wrap" Margin="36,0,36,12" />
+                            <TextBlock Grid.Row="3" x:Name="ResultSummary" Text="" Foreground="{StaticResource JmBrush.TextSecondary}" TextAlignment="Center" TextWrapping="Wrap" />
 
-                            <Grid Grid.Row="3" x:Name="BlockingResultGrid" Visibility="Collapsed">
+                            <Grid Grid.Row="4" x:Name="BlockingResultGrid" Visibility="Collapsed">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1*" />
                                     <ColumnDefinition Width="1.08*" />
@@ -190,7 +194,16 @@
                                 </Border>
                             </Grid>
 
-                            <TextBlock Grid.Row="4" x:Name="CountdownText" Text="" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource JmBrush.Primary}" HorizontalAlignment="Center" Margin="0,16,0,0" />
+                            <Border Grid.Row="5" x:Name="CountdownCard" Visibility="Collapsed"
+                                    Background="{StaticResource JmBrush.SurfaceAlt}"
+                                    BorderBrush="{StaticResource JmBrush.Border}" BorderThickness="1"
+                                    CornerRadius="10" Padding="22,12" HorizontalAlignment="Center" Margin="0,18,0,0">
+                                <TextBlock x:Name="CountdownText" Text="05:00"
+                                           FontSize="28" FontWeight="SemiBold"
+                                           Foreground="{StaticResource JmBrush.Primary}"
+                                           FontFamily="Consolas, Segoe UI Variable Text, Segoe UI"
+                                           TextAlignment="Center" MinWidth="90" />
+                            </Border>
                         </Grid>
                     </Grid>
                 </Border>
