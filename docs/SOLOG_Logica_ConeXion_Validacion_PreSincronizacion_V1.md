@@ -205,3 +205,17 @@ Validación técnica aprobada en Windows:
 - Sin errores de compilación.
 
 Smoke humano pendiente antes de cerrar el bloque.
+
+
+### Ajuste visual post-smoke
+
+Aprobado como delta visual Nivel A dentro del mismo bloque:
+
+- el subtítulo queda en: **“El archivo contiene errores que impedirían iniciar un conteo en SOLOG.”**;
+- el panel de errores usa dos columnas:
+  - izquierda: **“Corrige estos errores para continuar”** con tarjetas seleccionables;
+  - derecha: **“Cómo solucionarlos:”** con la solución contextual del error seleccionado;
+- la información de filas/valores se muestra solo en la tarjeta de la columna izquierda;
+- no se utilizan radio buttons: la selección se comunica mediante el resaltado de la tarjeta completa;
+- el CTA **Cargar otro Excel** se reemplaza por una **X** que vuelve al `ReadyPanel`, habilitando nuevamente drag & drop y selección de archivo;
+- no se modifica lógica de validación, persistencia, sincronización, contrato V2 ni backend.
