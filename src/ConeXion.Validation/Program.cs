@@ -366,9 +366,9 @@ static void SnapshotUsabilityBlocksDuplicate()
     Eq("codigo_interno_duplicado", blocker.Motivo, "motivo duplicado");
     Eq("CASINO CAFE VIBES", blocker.Producto, "producto duplicado");
     Eq(2, blocker.Observations.Count, "observaciones duplicado");
-    Eq(265, blocker.Observations[0].Row, "fila duplicado 1");
+    Eq<int?>(265, blocker.Observations[0].Row, "fila duplicado 1");
     Eq("0", blocker.Observations[0].Value, "stock duplicado 1");
-    Eq(906, blocker.Observations[1].Row, "fila duplicado 2");
+    Eq<int?>(906, blocker.Observations[1].Row, "fila duplicado 2");
     Eq("7", blocker.Observations[1].Value, "stock duplicado 2");
 }
 
@@ -396,7 +396,7 @@ static void SnapshotUsabilityBlocksInvalidStock()
     var result = SnapshotUsabilityValidator.Validate(snapshot, CatalogOne(20101, "A", "1", 1m));
     True(!result.IsUsable, "stock inválido debe bloquear");
     var blocker = Single(result.Blockers, x => x.CInterno == 20101);
-    Eq(55, blocker.Observations[0].Row, "fila stock inválido");
+    Eq<int?>(55, blocker.Observations[0].Row, "fila stock inválido");
     Eq("7 unidades", blocker.Observations[0].Value, "valor stock inválido");
 }
 
@@ -449,12 +449,12 @@ static void GatewayUsesV2Contracts()
     );
     using var gateway = new SupabaseGateway("https://unit.test", handler);
     var creds = new InstallationCredentials("iid", "secret");
-    var state = gateway.GetStateAsync(creds, "2.0.2", 6, "abc").GetAwaiter().GetResult();
+    var state = gateway.GetStateAsync(creds, "2.1.0", 6, "abc").GetAwaiter().GetResult();
     True(state.Ok, "state ok");
     Eq("OK", state.Codigo, "state codigo");
     Eq(2, state.CatalogSchemaVersion, "state schema");
-    True(gateway.ConfirmCatalogAsync(creds, "2.0.2", 6, "abc").GetAwaiter().GetResult(), "confirm catalog");
-    var upload = gateway.UploadSnapshotAsync(creds, "2.0.2", new SnapshotDocument { SnapshotId = Guid.Parse("10000000-0000-4000-8000-000000000001") }).GetAwaiter().GetResult();
+    True(gateway.ConfirmCatalogAsync(creds, "2.1.0", 6, "abc").GetAwaiter().GetResult(), "confirm catalog");
+    var upload = gateway.UploadSnapshotAsync(creds, "2.1.0", new SnapshotDocument { SnapshotId = Guid.Parse("10000000-0000-4000-8000-000000000001") }).GetAwaiter().GetResult();
     True(upload.Accepted, "upload accepted");
     Eq("OK", upload.Codigo, "upload codigo");
     Eq(3, upload.StockRows, "stock rows");
